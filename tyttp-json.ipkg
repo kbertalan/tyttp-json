@@ -1,0 +1,15 @@
+package tyttp-json
+
+modules = TyTTP.HTTP.Consumer.JSON
+
+depends = tyttp
+  , contrib
+  , json
+  , sop
+  , elab-util
+  , apache-mime-types
+
+sourcedir = "src"
+executable = tyttp-json
+main = Main
+
