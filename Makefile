@@ -23,3 +23,5 @@ install:
 dev: clean
 	find src/ -name *.idr | entr make run
 
+dev-build: clean
+	find src/ -name *.idr | entr make build

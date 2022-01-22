@@ -18,16 +18,6 @@ import TyTTP.URL
 import TyTTP.URL.Path
 import TyTTP.URL.Search
 
-sendError :
-  Error e
-  => HasIO io
-  => Status
-  -> String
-  -> Context me u h1 s StringHeaders a b
-  -> io $ Context me u h1 Status StringHeaders a (Publisher IO e Buffer)
-sendError st str ctx = do
-  text str ctx >>= status st
-
 %language ElabReflection
 
 record Example where
@@ -37,29 +27,17 @@ record Example where
 
 %runElab derive "Example" [Generic, Meta, Show, Eq, RecordFromJSON]
 
-hReturnExample : Error e
-  => HasIO m
-  => Context me u h1 s StringHeaders Example ()
-  -> m $ Context me u h1 Status StringHeaders Example (Publisher IO e Buffer)
-hReturnExample ctx = do
-  let payload = show ctx.request.body
-  text payload ctx >>= status OK
-
-hRouting : Error e
-  => Context Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) ()
-  -> Promise e IO $ Context Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) (Publisher IO e Buffer)
-hRouting =
-  let routingError = sendError NOT_FOUND "Resource could not be found"
-      parseUrlError = \err => sendError BAD_REQUEST "URL has invalid format"
-      decodeUriError = sendError BAD_REQUEST "URI decode has failed"
-      jsonParseError = \s => sendError BAD_REQUEST "Content cannot be parsed: \{s.request.body}" s
-  in
-    decodeUri' decodeUriError :> parseUrl' parseUrlError :> routes' routingError
-        [ post $ path "/json" $ consumes' [JSON] jsonParseError :> hReturnExample
-        ]
-
 main : IO ()
 main = eitherT putStrLn pure $ do
   http <- HTTP.require
-  ignore $ HTTP.listen' $ hRouting
-
+  ignore $ HTTP.listen' $
+    decodeUri' (text "URI decode has failed" >=> status BAD_REQUEST)
+    :> parseUrl' (const $ text "URL has invalid format" >=> status BAD_REQUEST)
+    :> routes' (text "Resource could not be found" >=> status NOT_FOUND)
+      [ post
+          $ path "/json"
+          $ consumes' [JSON]
+              { a = Example }
+              (\ctx => text "Content cannot be parsed: \{ctx.request.body}" ctx >>= status BAD_REQUEST)
+          $ \ctx => text (show ctx.request.body) ctx >>= status OK
+      ]
