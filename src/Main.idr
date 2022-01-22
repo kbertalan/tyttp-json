@@ -23,10 +23,10 @@ sendError :
   => HasIO io
   => Status
   -> String
-  -> Step me u h1 s StringHeaders a b
-  -> io $ Step me u h1 Status StringHeaders a (Publisher IO e Buffer)
-sendError st str step = do
-  text str step >>= status st
+  -> Context me u h1 s StringHeaders a b
+  -> io $ Context me u h1 Status StringHeaders a (Publisher IO e Buffer)
+sendError st str ctx = do
+  text str ctx >>= status st
 
 %language ElabReflection
 
@@ -39,15 +39,15 @@ record Example where
 
 hReturnExample : Error e
   => HasIO m
-  => Step me u h1 s StringHeaders Example ()
-  -> m $ Step me u h1 Status StringHeaders Example (Publisher IO e Buffer)
-hReturnExample step = do
-  let payload = show step.request.body
-  text payload step >>= status OK
+  => Context me u h1 s StringHeaders Example ()
+  -> m $ Context me u h1 Status StringHeaders Example (Publisher IO e Buffer)
+hReturnExample ctx = do
+  let payload = show ctx.request.body
+  text payload ctx >>= status OK
 
 hRouting : Error e
-  => Step Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) ()
-  -> Promise e IO $ Step Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) (Publisher IO e Buffer)
+  => Context Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) ()
+  -> Promise e IO $ Context Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) (Publisher IO e Buffer)
 hRouting =
   let routingError = sendError NOT_FOUND "Resource could not be found"
       parseUrlError = \err => sendError BAD_REQUEST "URL has invalid format"
