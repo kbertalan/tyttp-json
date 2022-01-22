@@ -50,12 +50,12 @@ hRouting : Error e
   -> Promise e IO $ Step Method String StringHeaders Status StringHeaders (Publisher IO e Buffer) (Publisher IO e Buffer)
 hRouting =
   let routingError = sendError NOT_FOUND "Resource could not be found"
-      urlError = \err => sendError BAD_REQUEST "URL has invalid format"
-      uriError = sendError BAD_REQUEST "URI decode has failed"
-      parseError = \s => sendError BAD_REQUEST "Content cannot be parsed: \{s.request.body}" s
+      parseUrlError = \err => sendError BAD_REQUEST "URL has invalid format"
+      decodeUriError = sendError BAD_REQUEST "URI decode has failed"
+      jsonParseError = \s => sendError BAD_REQUEST "Content cannot be parsed: \{s.request.body}" s
   in
-    uri' uriError :> url' urlError :> routes' routingError
-        [ post $ pattern "/json" $ consumes' [JSON] parseError :> hReturnExample
+    decodeUri' decodeUriError :> parseUrl' parseUrlError :> routes' routingError
+        [ post $ path "/json" $ consumes' [JSON] jsonParseError :> hReturnExample
         ]
 
 main : IO ()
