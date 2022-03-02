@@ -18,7 +18,7 @@ run: build
 	bash -c 'time node build/exec/$(executable)'
 
 install:
-	$(idris2) --install $(package)
+	$(idris2) --install $(package) --codegen $(codegen)
 
 dev: clean
 	find src/ -name *.idr | entr make run
