@@ -9,6 +9,7 @@ depends = tyttp
   , elab-util
   , apache-mime-types
 
+opts      = "--codegen node"
 sourcedir = "src"
 executable = tyttp-json
 main = Main
