@@ -13,6 +13,7 @@ import TyTTP.HTTP
 import TyTTP.HTTP.Consumer
 import TyTTP.HTTP.Consumer.JSON
 import TyTTP.HTTP.Producer
+import TyTTP.HTTP.Producer.JSON
 import TyTTP.HTTP.Routing
 import TyTTP.URL
 import TyTTP.URL.Path
@@ -25,12 +26,12 @@ record Example where
   field : String
   opt : Maybe Int
 
-%runElab derive "Example" [Generic, Meta, Show, Eq, RecordFromJSON]
+%runElab derive "Example" [Generic, Meta, Show, Eq, RecordToJSON, RecordFromJSON]
 
 main : IO ()
 main = eitherT putStrLn pure $ do
   http <- HTTP.require
-  ignore $ HTTP.listen' $
+  ignore $ HTTP.listen' {e = NodeError} $
     decodeUri' (text "URI decode has failed" >=> status BAD_REQUEST)
     :> parseUrl' (const $ text "URL has invalid format" >=> status BAD_REQUEST)
     :> routes' (text "Resource could not be found" >=> status NOT_FOUND)
@@ -39,5 +40,5 @@ main = eitherT putStrLn pure $ do
           $ consumes' [JSON]
               { a = Example }
               (\ctx => text "Content cannot be parsed: \{ctx.request.body}" ctx >>= status BAD_REQUEST)
-          $ \ctx => text (show ctx.request.body) ctx >>= status OK
+          $ \ctx => json (encode ctx.request.body) ctx >>= status OK
       ]
