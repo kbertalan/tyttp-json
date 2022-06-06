@@ -40,5 +40,5 @@ main = eitherT putStrLn pure $ do
           $ consumes' [JSON]
               { a = Example }
               (\ctx => text "Content cannot be parsed: \{ctx.request.body}" ctx >>= status BAD_REQUEST)
-          $ \ctx => json (encode ctx.request.body) ctx >>= status OK
+          $ \ctx => json ctx.request.body ctx >>= status OK
       ]
