@@ -3,18 +3,21 @@ module TyTTP.HTTP.Producer.JSON
 import Data.Buffer.Ext
 import TyTTP
 import TyTTP.HTTP
+import JSON
 
 export
 json :
   Applicative m
-  => String
+  => ToJSON j
+  => j
   -> Context me u v h1 s StringHeaders a b
   -> m $ Context me u v h1 s StringHeaders a (Publisher IO e Buffer)
-json str ctx = do
-  let stream : Publisher IO e Buffer = Stream.singleton $ fromString str
+json j ctx = do
+  let bodyJson = encode j
+  let stream : Publisher IO e Buffer = Stream.singleton $ fromString $ bodyJson
   pure $ { response.body := stream
          , response.headers :=
            [ ("Content-Type", "application/json")
-           , ("Content-Length", show $ length str)
+           , ("Content-Length", show $ length bodyJson)
            ]
          } ctx
