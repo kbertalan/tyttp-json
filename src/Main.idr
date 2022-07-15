@@ -29,16 +29,16 @@ record Example where
 %runElab derive "Example" [Generic, Meta, Show, Eq, RecordToJSON, RecordFromJSON]
 
 main : IO ()
-main = eitherT putStrLn pure $ do
+main = do
   http <- HTTP.require
-  ignore $ HTTP.listen' {e = NodeError} $
-    decodeUri' (text "URI decode has failed" >=> status BAD_REQUEST)
-    :> parseUrl' (const $ text "URL has invalid format" >=> status BAD_REQUEST)
-    :> routes' (text "Resource could not be found" >=> status NOT_FOUND)
-      [ post
-          $ path "/json"
-          $ consumes' [JSON]
-              { a = Example }
-              (\ctx => text "Content cannot be parsed: \{ctx.request.body}" ctx >>= status BAD_REQUEST)
-          $ \ctx => json ctx.request.body ctx >>= status OK
-      ]
+  ignore $ HTTP.listen'
+    $ (\next, ctx => mapFailure Node.Error.message (next ctx))
+    $ parseUrl' (const $ text "URL has invalid format" >=> status BAD_REQUEST)
+    :> routes' (text "Resource could not be found" >=> status NOT_FOUND) { m = Promise NodeError IO }
+        [ post
+            $ path "/json"
+            $ consumes' [JSON]
+                { a = Example }
+                (\ctx => text "Content cannot be parsed: \{ctx.request.body}" ctx >>= status BAD_REQUEST)
+            $ \ctx => json ctx.request.body ctx >>= status OK
+        ]
