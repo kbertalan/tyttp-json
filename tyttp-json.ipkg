@@ -4,6 +4,7 @@ modules = TyTTP.HTTP.Consumer.JSON
   , TyTTP.HTTP.Producer.JSON
 
 depends = tyttp
+  , promise
   , contrib
   , json
   , sop
