@@ -6,13 +6,13 @@ import TyTTP.HTTP
 import JSON
 
 export
-json :
+sendJSON :
   Applicative m
   => ToJSON j
   => j
   -> Context me u v h1 s StringHeaders a b
   -> m $ Context me u v h1 s StringHeaders a (Publisher IO e Buffer)
-json j ctx = do
+sendJSON j ctx = do
   let bodyJson = encode j
   let stream : Publisher IO e Buffer = Stream.singleton $ fromString $ bodyJson
   pure $ { response.body := stream
