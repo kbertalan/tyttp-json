@@ -1,10 +1,14 @@
 # tyttp-json
 
-JSON body consumer for [tyttp](https://github.com/kbertalan/tyttp)
+JSON body consumer and producer for [tyttp](https://github.com/kbertalan/tyttp)
 
 Enables using
 
-    consumes [JSON] handler step
+    consumes [JSON] handler context
+
+and
+
+    sendJSON someToJSONValue context
 
 in your tyttp expression.
 
