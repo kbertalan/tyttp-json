@@ -10,6 +10,7 @@ depends = tyttp
   , sop
   , elab-util
   , apache-mime-types
+  , node
 
 opts      = "--codegen node"
 sourcedir = "src"
