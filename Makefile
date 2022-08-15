@@ -6,13 +6,13 @@ codegen=node
 .PHONY: build clean repl install dev
 
 build:
-	bash -c 'time $(idris2) --build $(package) --codegen $(codegen)'
+	bash -c 'time pack build $(package)'
 
 clean:
 	rm -rf build
 
 repl:
-	rlwrap $(idris2) --repl $(package)
+	pack --with-ipkg $(package) --rlwrap repl
 
 run: build
 	bash -c 'time node build/exec/$(executable)'
