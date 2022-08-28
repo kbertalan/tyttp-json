@@ -2,10 +2,9 @@ module TyTTP.HTTP.Consumer.JSON
 
 import Data.Buffer.Ext
 import JSON
-import Language.JSON as LJ
 import TyTTP.HTTP.Consumer
 
-%hide Language.JSON.Data.JSON
+%hide JSON.Parser.JSON
 
 export
 data JSON : Type where
