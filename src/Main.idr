@@ -11,6 +11,8 @@ import TyTTP.URL
 
 %language ElabReflection
 
+%hide JSON.Parser.JSON
+
 record Example where
   constructor MkExample
   field : String
