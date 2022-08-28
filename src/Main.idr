@@ -24,7 +24,7 @@ main : IO ()
 main = do
   http <- HTTP.require
   ignore $ HTTP.listen'
-    $ (\next, ctx => mapFailure Node.Error.message (next ctx))
+    $ (\next, ctx => mapFailure message (next ctx))
     $ parseUrl' (const $ sendText "URL has invalid format" >=> status BAD_REQUEST)
     :> routes' (sendText "Resource could not be found" >=> status NOT_FOUND) { m = Promise Error IO }
         [ post
