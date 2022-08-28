@@ -14,8 +14,6 @@ depends = tyttp
 
 opts      = "--codegen node"
 sourcedir = "src"
-executable = tyttp-json
-main = Main
 
 brief = "JSON payload consumer and producer for TyTTP web framework"
 

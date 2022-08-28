@@ -1,5 +1,6 @@
-module Main
+module JSONServer
 
+import Data.Buffer.Ext
 import Generics.Derive
 import JSON
 import TyTTP.Adapter.Node.HTTP
@@ -23,7 +24,7 @@ record Example where
 main : IO ()
 main = do
   http <- HTTP.require
-  ignore $ HTTP.listen'
+  server <- HTTP.listen'
     $ (\next, ctx => mapFailure message (next ctx))
     $ parseUrl' (const $ sendText "URL has invalid format" >=> status BAD_REQUEST)
     :> routes' (sendText "Resource could not be found" >=> status NOT_FOUND) { m = Promise Error IO }
@@ -34,3 +35,15 @@ main = do
                 (\ctx => sendText "Content cannot be parsed: \{ctx.request.body}" ctx >>= status BAD_REQUEST)
             $ \ctx => sendJSON ctx.request.body ctx >>= status OK
         ]
+
+  req <- http.request "http://localhost:3000/json" ({ request.method := "POST", request.headers := Just (singleton "Content-Type" "application/json") } defaultOptions) $ \res => do
+    res.onData $ putStrLn . show
+    res.onEnd server.close
+
+  req.write """
+  {
+    "field": "a field value",
+    "opt": 1
+  }
+  """ Nothing
+  req.end Nothing

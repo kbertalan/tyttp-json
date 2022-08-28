@@ -3,7 +3,7 @@ executable=tyttp-json
 idris2=idris2
 codegen=node
 
-.PHONY: build clean repl install dev
+.PHONY: build clean repl install dev dev-build test-clean test-build test dev-test
 
 build:
 	bash -c 'time pack build $(package)'
@@ -25,3 +25,16 @@ dev: clean
 
 dev-build: clean
 	find src/ -name *.idr | entr make build
+
+test-clean:
+	make -C tests clean
+
+test-build:
+	make -C tests build
+
+test: test-build
+	make -C tests test
+
+dev-test:
+	find . -name *.idr | INTERACTIVE="" entr make test
+
